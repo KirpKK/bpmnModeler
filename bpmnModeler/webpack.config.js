@@ -1,5 +1,5 @@
 const path = require('path');
-//const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
   module.exports = {
 	  
@@ -13,29 +13,31 @@ const path = require('path');
      loaders: [
 		{
 			test: /\.css$/,
-		use: ['style-loader','css-loader']
-			
+			use: ExtractTextPlugin.extract({
+				fallback: 'style-loader',
+				use: 'css-loader'
+			})
 		},
 		{
          test: /\.(png|svg|jpg|gif)$/,
-         loader: 'file-loader'
+         loader: ExtractTextPlugin.extract('file-loader')
        },
        {
          test: /\.(woff|woff2|eot|ttf|otf)$/,
-         loader: 'file-loader'
+         loader: ExtractTextPlugin.extract('file-loader')
        },
 		{
 		   test: /\.(csv|tsv)$/,
-          loader: 'csv-loader'
+          loader: ExtractTextPlugin.extract('csv-loader')
 		},
    	{ 
    	  test: /\.xml$/, 
-   	  loader: 'xml-loader'
+   	  loader: ExtractTextPlugin.extract('xml-loader') 
    	} 
 	 ]
-  }
- //plugins: [
- //   new ExtractTextPlugin('bundle.css')
-// ]
+  },
+ plugins: [
+    new ExtractTextPlugin('bundle.css')
+ ]
 	
 };
