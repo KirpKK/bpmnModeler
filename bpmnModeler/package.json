@@ -1,0 +1,26 @@
+{
+  "name": "bpmnmodeler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "bpmn-js": "^0.26.6",
+    "bpmn-moddle": "^2.1.0",
+    "css-loader": "^0.28.9",
+    "csv-loader": "^2.1.1",
+    "diagram-js": "^0.28.1",
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "file-loader": "^1.1.6",
+    "fs": "0.0.1-security",
+    "jquery": "^3.3.1",
+    "node-static": "^0.7.10",
+    "style-loader": "^0.20.1",
+    "underscore": "^1.8.3",
+    "webpack": "^3.10.0",
+    "xml-loader": "^1.2.1",
+    "xmlbuilder": "^9.0.7"
+  },
+  "devDependencies": {}
+}
