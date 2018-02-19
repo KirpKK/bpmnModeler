@@ -124,7 +124,30 @@ function registerFileDrop(container, callback) {
 			alert(err);
 		}
 	});
-}
+  }
+  
+  function openDiagramDB() {
+	var name = prompt("Enter diagram's name", 'diagram');
+	
+	var nano = nanoImp('http://127.0.0.1:5984');
+	var diagrams = nano.db.use('diagrams');
+
+	var b = false;
+   diagrams.view('view_diagram/', 'by_key', { include_docs: true
+   }, function(err, body){
+		body.rows.forEach(function(row) {
+			if(row.id==String(name)){
+				b = true;
+				if (typeof(row.doc.diagram)=='string') {
+					openDiagram(row.doc.diagram);
+				} else {
+					alert('Diagram is undefined');
+				}
+			}
+		});
+		if (!b) alert('No diagram is found');
+	});
+  }
 
 ////// file drag / drop ///////////////////////
 
@@ -165,7 +188,15 @@ $(function() {
   var downloadSvgLink = $('#js-download-svg');
  
     $('#js-download-db').click(function(e) {	
+	e.stopPropagation();
+    e.preventDefault();
 	insertDiagramDB();
+	});
+	
+	$('#js-open-db').click(function(e) {	
+	e.stopPropagation();
+    e.preventDefault();
+	openDiagramDB();
 	});
 
   $('.buttons a').click(function(e) {
