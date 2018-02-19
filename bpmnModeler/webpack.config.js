@@ -8,6 +8,9 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
     filename: 'packedindex.js',
     path: path.resolve(__dirname, 'routes')
   },
+  node: {
+        fs: 'empty',
+},
   
   module: {
      loaders: [

@@ -5,6 +5,7 @@ import '../node_modules/diagram-js/assets/diagram-js.css';
 import $ from 'jquery';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 import builder from 'xmlbuilder';
+import nanoImp from 'nano';
 
 var container = $('#js-drop-zone');
 
@@ -103,6 +104,27 @@ function registerFileDrop(container, callback) {
   container.get(0).addEventListener('drop', handleFileSelect, false);
 }
 
+///////////////////    DB   /////////////////
+  function insertDiagramDB() {
+	var name = prompt("Enter diagram's name", 'diagram');
+
+	var nano = nanoImp('http://127.0.0.1:5984');
+	var diagrams = nano.db.use('diagrams');
+
+	var diagram;
+	modeler.saveXML({ format: true }, function(err, xml) {
+	  diagram = xml;
+    });
+
+	//Insert diagram
+	diagrams.insert({_id: name, diagram: String(diagram)}, name, function(err, body) {
+		if (!err){
+		console.log(body);
+		} else {
+			alert(err);
+		}
+	});
+}
 
 ////// file drag / drop ///////////////////////
 
@@ -118,25 +140,8 @@ if (!window.FileList || !window.FileReader) {
 // bootstrap diagram functions
 
 $(function() {
-
-  $('#js-create-diagram').click(function(e) {
-    e.stopPropagation();
-    e.preventDefault();
-
-    createNewDiagram();
-  });
-
-  var downloadLink = $('#js-download-diagram');
-  var downloadSvgLink = $('#js-download-svg');
-
-  $('.buttons a').click(function(e) {
-    if (!$(this).is('.active')) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  });
-
-  function setEncoded(link, name, data) {
+	
+	function setEncoded(link, name, data) {
     var encodedData = encodeURIComponent(data);
 
     if (data) {
@@ -149,6 +154,27 @@ $(function() {
     }
   }
 
+  $('#js-create-diagram').click(function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    createNewDiagram();
+  });
+  
+  var downloadLink = $('#js-download-diagram');
+  var downloadSvgLink = $('#js-download-svg');
+ 
+    $('#js-download-db').click(function(e) {	
+	insertDiagramDB();
+	});
+
+  $('.buttons a').click(function(e) {
+    if (!$(this).is('.active')) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
+
   var _ = require('lodash');
 
   var exportArtifacts = _.debounce(function() {
@@ -160,6 +186,7 @@ $(function() {
     saveDiagram(function(err, xml) {
       setEncoded(downloadLink, 'diagram.bpmn', err ? null : xml);
     });
+	
   }, 500);
 
   modeler.on('commandStack.changed', exportArtifacts);
