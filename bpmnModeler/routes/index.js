@@ -8,8 +8,11 @@ import builder from 'xmlbuilder';
 import nanoImp from 'nano';
 
 var container = $('#js-drop-zone');
-
 var canvas = $('#js-canvas');
+var preview = $('#preview');
+var intro = $('#intro');
+var name;
+preview.hide();
 
 var modeler = new BpmnModeler({ container: canvas });
 
@@ -115,9 +118,13 @@ function registerFileDrop(container, callback) {
 	modeler.saveXML({ format: true }, function(err, xml) {
 	  diagram = xml;
     });
+	var img;
+	modeler.saveSVG({ format: true }, function(err, svg) {
+	  img = svg;
+    });
 
 	//Insert diagram
-	diagrams.insert({_id: name, diagram: String(diagram)}, name, function(err, body) {
+	diagrams.insert({_id: name, diagram: String(diagram), img: String(img)}, name, function(err, body) {
 		if (!err){
 		console.log(body);
 		} else {
@@ -126,20 +133,51 @@ function registerFileDrop(container, callback) {
 	});
   }
   
-  function openDiagramDB() {
-	var name = prompt("Enter diagram's name", 'diagram');
+  function openDiagramDB(name) {
+	
+	preview.hide();
 	
 	var nano = nanoImp('http://127.0.0.1:5984');
 	var diagrams = nano.db.use('diagrams');
 
 	var b = false;
-   diagrams.view('view_diagram/', 'by_key', { include_docs: true
-   }, function(err, body){
+    diagrams.view('view_diagram/', 'by_key', { include_docs: true
+		}, function(err, body){
 		body.rows.forEach(function(row) {
 			if(row.id==String(name)){
 				b = true;
 				if (typeof(row.doc.diagram)=='string') {
 					openDiagram(row.doc.diagram);
+				} else {
+					alert('Diagram is undefined');
+				}
+			}
+		});
+		if (!b) alert('No diagram is found');
+	});
+  }
+  
+    function showPreview() {
+	name = prompt("Enter diagram's name", 'diagram');
+	
+	preview.show();
+	intro.hide();
+	
+	var nano = nanoImp('http://127.0.0.1:5984');
+	var diagrams = nano.db.use('diagrams');
+
+	var b = false;
+    diagrams.view('view_diagram/', 'by_key', { include_docs: true
+		}, function(err, body){
+		body.rows.forEach(function(row) {
+			if(row.id==String(name)){
+				b = true;
+				if (typeof(row.doc.diagram)=='string') {
+					var num = row.doc.img.indexOf('<svg');
+					var svg = row.doc.img.substr(num);
+					var newSvg = svg.substr(0,5) + 'style="max-width:550px;max-height:350px;" ' + svg.substr(5);
+					$('#svg').append(newSvg);
+					$('#confirm').append('<a class="prv">Open diagram ' + name + '?</a>');
 				} else {
 					alert('Diagram is undefined');
 				}
@@ -196,7 +234,20 @@ $(function() {
 	$('#js-open-db').click(function(e) {	
 	e.stopPropagation();
     e.preventDefault();
-	openDiagramDB();
+	showPreview();
+	});
+	
+	$('#open-diagram').click(function(e) {	
+	e.stopPropagation();
+    e.preventDefault();
+	openDiagramDB(name);
+	});
+	
+	$('#cancel').click(function(e) {
+	intro.show();
+	preview.hide();
+	$("svg").remove();
+	$("a.prv").remove();
 	});
 
   $('.buttons a').click(function(e) {

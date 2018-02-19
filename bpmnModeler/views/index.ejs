@@ -5,13 +5,22 @@
 <body>
   <div class="content" id="js-drop-zone">
 
-    <div class="message intro">
+    <div class="message intro" id="intro">
       <div class="note">
         Drop BPMN diagram from your desktop or <a id="js-create-diagram" href>create a new diagram</a> to get started
 		or <a id="js-open-db" href title="open from database">open from database</a>
       </div>
     </div>
-
+	
+	<div class="preview" id="preview" height=450 align="center">
+		<div class="confirm" id="confirm">
+		</div>
+		<div class="svg" id="svg">
+		</div>
+		<a id="cancel" href title="Cancel">Cancel</a>
+		<a id="open-diagram" href title="Open">Open</a>
+		</div>
+	</div>
     <div class="canvas" id="js-canvas"></div>
   </div>
 
