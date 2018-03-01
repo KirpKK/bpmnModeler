@@ -11,8 +11,10 @@ var container = $('#js-drop-zone');
 var canvas = $('#js-canvas');
 var preview = $('#preview');
 var intro = $('#intro');
+var showAll = $('#showAll');
 var name;
 preview.hide();
+showAll.hide();
 
 var modeler = new BpmnModeler({ container: canvas });
 
@@ -124,19 +126,20 @@ function registerFileDrop(container, callback) {
     });
 
 	//Insert diagram
-	diagrams.insert({_id: name, diagram: String(diagram), img: String(img)}, name, function(err, body) {
-		if (!err){
-		console.log(body);
-		} else {
-			alert(err);
-		}
-	});
+	if (typeof(diagram) == 'undefined'){
+		alert('Diagram is undefined');
+	} else {
+		diagrams.insert({_id: name, diagram: String(diagram), img: String(img)}, name, function(err, body) {
+			if (!err){
+			console.log(body);
+			} else {
+				alert(err);
+			}
+		});
+	}
   }
   
   function openDiagramDB(name) {
-	
-	preview.hide();
-	
 	var nano = nanoImp('http://127.0.0.1:5984');
 	var diagrams = nano.db.use('diagrams');
 
@@ -160,9 +163,6 @@ function registerFileDrop(container, callback) {
     function showPreview() {
 	name = prompt("Enter diagram's name", 'diagram');
 	
-	preview.show();
-	intro.hide();
-	
 	var nano = nanoImp('http://127.0.0.1:5984');
 	var diagrams = nano.db.use('diagrams');
 
@@ -182,6 +182,24 @@ function registerFileDrop(container, callback) {
 					alert('Diagram is undefined');
 				}
 			}
+		});
+		if (!b) alert('No diagram is found');
+	});
+  }
+  
+  function showAllDiagrams() {
+	preview.hide();
+	intro.hide();
+	
+	var nano = nanoImp('http://127.0.0.1:5984');
+	var diagrams = nano.db.use('diagrams');
+
+	var b = false;
+    diagrams.view('view_diagram/', 'by_key', { include_docs: true
+		}, function(err, body){
+		body.rows.forEach(function(row) {
+				b = true;
+				$('#allDiagrams').append('<li>' + row.id + '</li>');
 		});
 		if (!b) alert('No diagram is found');
 	});
@@ -234,18 +252,31 @@ $(function() {
 	$('#js-open-db').click(function(e) {	
 	e.stopPropagation();
     e.preventDefault();
+	showAll.show();
+	showAllDiagrams();
+	});
+	
+	$('#open-preview').click(function(e) {	
+	e.stopPropagation();
+    e.preventDefault();
+	preview.show();
+	intro.hide();
+	showAll.hide();
 	showPreview();
 	});
 	
 	$('#open-diagram').click(function(e) {	
 	e.stopPropagation();
     e.preventDefault();
+	preview.hide();
+	showAll.hide();
 	openDiagramDB(name);
 	});
 	
 	$('#cancel').click(function(e) {
 	intro.show();
 	preview.hide();
+	showAll.hide();
 	$("svg").remove();
 	$("a.prv").remove();
 	});
